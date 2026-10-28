@@ -37,4 +37,5 @@ jobs:
           fi
       - name: Test notification
         if: github.event_name == 'workflow_dispatch'
-        run: curl -s -H "Title: Camera West monitor" -H "Priority: urgent" -d "Test alert: your phone is wired up" "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
+        run: |
+          curl -s -H "Title: Camera West monitor" -H "Priority: urgent" -d "Test alert - your phone is wired up" "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
