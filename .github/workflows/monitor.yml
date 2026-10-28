@@ -1,8 +1,10 @@
 name: Camera West monitor
 on:
   schedule:
-    # Drops are Wed & Fri. Tight polling those days (every 5 min, 14:00-05:00 UTC = 8am-11pm Mountain)
-    - cron: "*/5 14-23,0-5 * * 3,5"
+    # Wed & Fri daytime, every 5 min (14:00-23:59 UTC = 8am-6pm Mountain)
+    - cron: "*/5 14-23 * * 3,5"
+    # Wed & Fri evening: after midnight UTC is Thu/Sat, so use days 4,6 (6pm-11pm Mountain)
+    - cron: "*/5 0-5 * * 4,6"
     # Quiet/silent releases can land any day, so check hourly otherwise
     - cron: "7 * * * *"
   workflow_dispatch:
@@ -33,3 +35,6 @@ jobs:
               sleep 3
             done
           fi
+      - name: Test notification
+        if: github.event_name == 'workflow_dispatch'
+        run: curl -s -H "Title: Camera West monitor" -H "Priority: urgent" -d "Test alert: your phone is wired up" "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
