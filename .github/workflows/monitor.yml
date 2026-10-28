@@ -1,0 +1,29 @@
+name: Camera West monitor
+on:
+  schedule:
+    # Drops are Wed & Fri. Tight polling those days (every 5 min, 14:00-05:00 UTC = 8am-11pm Mountain)
+    - cron: "*/5 14-23,0-5 * * 3,5"
+    # Quiet/silent releases can land any day, so check hourly otherwise
+    - cron: "7 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: monitor
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run monitor
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python3 monitor.py
+      - name: Save state
+        run: |
+          git config user.name "monitor-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || (git commit -m "update state" && git push)
